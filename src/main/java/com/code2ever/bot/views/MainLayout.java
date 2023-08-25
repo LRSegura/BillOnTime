@@ -1,6 +1,7 @@
 package com.code2ever.bot.views;
 
 import com.code2ever.bot.views.about.AboutView;
+import com.code2ever.bot.views.about.BatchView;
 import com.code2ever.bot.views.bill.BillView;
 import com.code2ever.bot.views.helloworld.HelloWorldView;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -51,17 +52,15 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
-
         nav.addItem(new SideNavItem("Hello World", HelloWorldView.class, LineAwesomeIcon.GLOBE_SOLID.create()));
         nav.addItem(new SideNavItem("About", AboutView.class, LineAwesomeIcon.COLUMNS_SOLID.create()));
         nav.addItem(new SideNavItem("Bill", BillView.class, LineAwesomeIcon.CALCULATOR_SOLID.create()));
-
+        nav.addItem(new SideNavItem("Batch", BatchView.class, LineAwesomeIcon.CALCULATOR_SOLID.create()));
         return nav;
     }
 
     private Footer createFooter() {
         Footer layout = new Footer();
-
         return layout;
     }
 

@@ -1,52 +1,43 @@
 package com.code2ever.bot.data.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Version;
+import com.code2ever.bot.api.annotations.InjectedDate;
+import com.code2ever.bot.api.persistence.validations.HibernateEventHandlers;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.ToString;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+
+@Getter
+@ToString
 @MappedSuperclass
+@EntityListeners(HibernateEventHandlers.class)
 public abstract class AbstractEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idgenerator")
-    // The initial value is to account for data.sql demo data ids
-    @SequenceGenerator(name = "idgenerator", initialValue = 1000)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id", nullable = false)
     private Long id;
 
+    @Column(name = "Register_Date", nullable = false)
+    @InjectedDate
+    private LocalDateTime registerDate;
+
     @Version
+    @Column(name = "OptLock")
     private int version;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public int getVersion() {
-        return version;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractEntity that)) return false;
+        return version == that.version && Objects.equals(id, that.id) && Objects.equals(registerDate, that.registerDate);
     }
 
     @Override
     public int hashCode() {
-        if (getId() != null) {
-            return getId().hashCode();
-        }
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof AbstractEntity that)) {
-            return false; // null or not an AbstractEntity class
-        }
-        if (getId() != null) {
-            return getId().equals(that.getId());
-        }
-        return super.equals(that);
+        return Objects.hash(id, registerDate, version);
     }
 }
