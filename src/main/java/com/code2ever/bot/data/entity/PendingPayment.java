@@ -15,17 +15,20 @@ import java.util.Objects;
 public class PendingPayment extends AbstractEntity {
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "FK_Bill_PendingPayment"))
     private Bill bill;
 
-    @Column
-    private LocalDate date;
+    @Column(nullable = false)
+    private LocalDate initialDate;
 
-    @Column
-    private Boolean paid;
+    @Column(nullable = false)
+    private LocalDate limitDate;
+
+    @Column(nullable = false)
+    private Boolean isPaid;
 
     @ManyToOne(optional = false)
-    @JoinColumn
+    @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "FK_BatchPayment_PendingPayment"))
     private BatchPayment batchPayments;
 
     @Override
@@ -33,15 +36,13 @@ public class PendingPayment extends AbstractEntity {
         if (this == o) return true;
         if (!(o instanceof PendingPayment that)) return false;
         if (!super.equals(o)) return false;
-        return Objects.equals(bill, that.bill) && Objects.equals(date, that.date) && Objects.equals(paid, that.paid);
+        return Objects.equals(bill, that.bill) && Objects.equals(limitDate, that.limitDate) && Objects.equals(isPaid, that.isPaid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), bill, date, paid);
+        return Objects.hash(super.hashCode(), bill, limitDate, isPaid);
     }
-
-
 
 
 }

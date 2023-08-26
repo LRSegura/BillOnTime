@@ -1,9 +1,9 @@
 package com.code2ever.bot;
 
-import com.code2ever.bot.data.service.BatchService;
-import com.code2ever.bot.data.service.BillService;
+import com.code2ever.bot.data.service.batch.BatchService;
+import com.code2ever.bot.data.service.bill.BillService;
 import com.code2ever.bot.data.service.PendingPaymentRegister;
-import com.code2ever.bot.data.service.PendingPaymentService;
+import com.code2ever.bot.data.service.pendingpayment.PendingPaymentService;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
 

@@ -3,8 +3,8 @@ package com.code2ever.bot.views.about;
 import com.code2ever.bot.data.entity.AbstractEntity;
 import com.code2ever.bot.data.entity.BatchPayment;
 import com.code2ever.bot.data.entity.PendingPayment;
-import com.code2ever.bot.data.service.BatchService;
-import com.code2ever.bot.data.service.PendingPaymentService;
+import com.code2ever.bot.data.service.batch.BatchService;
+import com.code2ever.bot.data.service.pendingpayment.PendingPaymentService;
 import com.code2ever.bot.views.MainLayout;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.dependency.Uses;
@@ -22,7 +22,7 @@ import com.vaadin.flow.router.Route;
 import java.util.List;
 
 @PageTitle("Batch")
-@Route(value = "batch", layout = MainLayout.class)
+@Route(value = "bot/batch", layout = MainLayout.class)
 @Uses(Icon.class)
 public class BatchView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 
@@ -46,15 +46,16 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
 
     private void createPendingPaymentGrid() {
         pendingPaymentGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        pendingPaymentGrid.addColumn(AbstractEntity::getId).setAutoWidth(true).setHeader(
-                "Id");
         pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getBill().getName()).setAutoWidth(true).setHeader(
-                "Bill Name");
+                "Name");
         pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getBill().getTotal()).setAutoWidth(true).setHeader(
-                "Bill Price");
-        pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getPaid() ? "Yes" : "No").setAutoWidth(true).setHeader(
-                "Bill Price");
-//        pendingPaymentGrid.setItems(pendingPaymentService.findAll());
+                "Total");
+        pendingPaymentGrid.addColumn(PendingPayment::getInitialDate).setAutoWidth(true).setHeader(
+                "Initial Date");
+        pendingPaymentGrid.addColumn(PendingPayment::getLimitDate).setAutoWidth(true).setHeader(
+                "Limit Date");
+        pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getIsPaid() ? "Yes" : "No").setAutoWidth(true).setHeader(
+                "Paid");
     }
 
     private void createBatchPaymentGrid() {
@@ -62,10 +63,7 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
         batchPaymentGrid.addColumn(BatchPayment::getBatchDate).setAutoWidth(true).setHeader("Batch Date");
         batchPaymentGrid.addColumn(batchPayment -> batchPayment.getIsBatchPaid() ? "Yes" : "No").setAutoWidth(true).setHeader(
                 "Paid");
-//        batchPaymentGrid.addComponentColumn()
-//        batchPaymentGrid.addComponentColumn(batchPayment -> batchPayment.getIsBatchPaid())
-//                .setTooltipGenerator(person -> person.getStatus())
-//                .setHeader("Status");
+
         batchPaymentGrid.setItems(batchService.findAll());
         batchPaymentGrid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {

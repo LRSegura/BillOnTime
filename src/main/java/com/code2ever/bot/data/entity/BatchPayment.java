@@ -2,14 +2,12 @@ package com.code2ever.bot.data.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,13 +15,13 @@ import java.util.Objects;
 @Setter
 @Entity
 @ToString
-public class BatchPayment extends AbstractEntity{
-
-    @Column
-    private Boolean isBatchPaid;
+public class BatchPayment extends AbstractEntity {
 
     @Column
     private LocalDate batchDate;
+
+    @Column
+    private Boolean isBatchPaid;
 
     @OneToMany(mappedBy = "batchPayments")
     private List<PendingPayment> pendingPayment;

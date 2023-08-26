@@ -1,4 +1,4 @@
-package com.code2ever.bot.data.service;
+package com.code2ever.bot.data.service.bill;
 
 import com.code2ever.bot.data.entity.Bill;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package com.code2ever.bot.views.bill;
 
 import com.code2ever.bot.data.entity.Bill;
-import com.code2ever.bot.data.service.BillService;
+import com.code2ever.bot.data.service.bill.BillService;
 import com.code2ever.bot.views.MainLayout;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Composite;
@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @PageTitle("Bill")
-@Route(value = "bill", layout = MainLayout.class)
+@Route(value = "bot/bill", layout = MainLayout.class)
 @Uses(Icon.class)
 public class BillView extends Composite<VerticalLayout> {
 

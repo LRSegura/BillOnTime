@@ -1,4 +1,4 @@
-package com.code2ever.bot.data.service;
+package com.code2ever.bot.data.service.batch;
 
 import com.code2ever.bot.data.entity.BatchPayment;
 import org.springframework.stereotype.Service;
