@@ -1,6 +1,5 @@
 package com.code2ever.bot.views.bill;
 
-import com.code2ever.bot.data.entity.AbstractEntity;
 import com.code2ever.bot.data.entity.Bill;
 import com.code2ever.bot.data.service.BillService;
 import com.code2ever.bot.views.MainLayout;
@@ -12,9 +11,11 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -24,6 +25,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
@@ -45,25 +47,25 @@ public class BillView extends Composite<VerticalLayout> {
     private final VerticalLayout leftColumn = new VerticalLayout();
     private final VerticalLayout centralColumn = new VerticalLayout();
     private final VerticalLayout rightColumn = new VerticalLayout();
-    private final H3 h3 = new H3();
     private final HorizontalLayout row1InCentralColumn = new HorizontalLayout();
     private final VerticalLayout column1InRow1InCentralColumn = new VerticalLayout();
+    private final VerticalLayout column2InRow1InCentralColumn = new VerticalLayout();
+    private final HorizontalLayout row2InCentralColumn = new HorizontalLayout();
+    private final H3 h3 = new H3();
     private final TextField billNameField = new TextField();
     private final BigDecimalField billTotalField = new BigDecimalField();
     private final IntegerField billDeadLineField = new IntegerField();
-    private final Select<Integer> billDay = new Select<>();
-    private final Checkbox isCreditCard = new Checkbox();
-    private final VerticalLayout column2InRow1InCentralColumn = new VerticalLayout();
-    private final HorizontalLayout row2InCentralColumn = new HorizontalLayout();
+    private final Select<Integer> billDaySelect = new Select<>();
+    private final Checkbox creditCardCheckbox = new Checkbox();
     private final Button buttonSave = new Button();
     private final Button buttonCancel = new Button();
-
     private final Grid<Bill> billGrid = new Grid<>(Bill.class, false);
-
     private final BillService service;
+    private final List<Bill> billList = new ArrayList<>();
 
     public BillView(BillService service) {
         this.service = service;
+        billList.addAll(service.findAll());
         initComponent();
     }
 
@@ -76,17 +78,73 @@ public class BillView extends Composite<VerticalLayout> {
         initUiComponents();
     }
 
-    private void createBillGrid(){
+    private void createBillGrid() {
         billGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        billGrid.addColumn(Bill::getName).setAutoWidth(true).setHeader(
-                "Name");
-        billGrid.addColumn(Bill::getTotal).setAutoWidth(true).setHeader(
-                "Total");
-        billGrid.addColumn(Bill::getBillingDay).setAutoWidth(true).setHeader(
-                "Billing Day");
-        billGrid.addColumn(Bill::getDeadLine).setAutoWidth(true).setHeader(
-                "DeadLine");
-        billGrid.setItems(service.findAll());
+        Grid.Column<Bill> billNameColumn = billGrid.addColumn(Bill::getName).setAutoWidth(true).setHeader("Name");
+        Grid.Column<Bill> billTotalColumn = billGrid.addColumn(Bill::getTotal).setAutoWidth(true).setHeader("Total");
+        Grid.Column<Bill> billingDayColumn = billGrid.addColumn(Bill::getBillingDay).setAutoWidth(true).setHeader("Billing Day");
+        Grid.Column<Bill> billDeadLineColumn = billGrid.addColumn(Bill::getDeadLine).setAutoWidth(true).setHeader("DeadLine");
+        Grid.Column<Bill> creditCardColumn = billGrid.addColumn(bill -> bill.getIsCreditCard() ? "True" : "False").setAutoWidth(true).setHeader("Credit Card");
+
+        Editor<Bill> editor = billGrid.getEditor();
+        Grid.Column<Bill> editColumn = billGrid.addComponentColumn(bill -> {
+
+            Button editButton = new Button("Edit");
+            Button deleteButton = new Button("Delete", event -> {
+                service.delete(bill);
+                billList.remove(bill);
+                billGrid.setItems(billList);
+            });
+            HorizontalLayout actions = new HorizontalLayout(editButton, deleteButton);
+            actions.setPadding(false);
+            editButton.addClickListener(event -> {
+                if (editor.isOpen()) {
+                    editor.cancel();
+                }
+                billGrid.getEditor().editItem(bill);
+            });
+            return actions;
+        });
+        Binder<Bill> billBinder = new Binder<>(Bill.class);
+        editor.setBinder(billBinder);
+        editor.setBuffered(true);
+
+
+        TextField billNameField = new TextField();
+        billNameField.setWidthFull();
+        billBinder.forField(billNameField).asRequired("Name must not be empty").bind(Bill::getName, Bill::setName);
+        billNameColumn.setEditorComponent(billNameField);
+
+        BigDecimalField billTotalField = new BigDecimalField();
+        billTotalField.setWidthFull();
+        billBinder.forField(billTotalField).asRequired("Total must not be empty").bind(Bill::getTotal, Bill::setTotal);
+        billTotalColumn.setEditorComponent(billTotalField);
+
+        Select<Integer> billDayField = new Select<>();
+        billDayField.setWidthFull();
+        billDayField.setItems(getBillingDays());
+        billBinder.forField(billDayField).asRequired("Bill Day must not be empty").bind(Bill::getBillingDay, Bill::setBillingDay);
+        billingDayColumn.setEditorComponent(billDayField);
+
+        IntegerField billDeadLineField = new IntegerField();
+        billDeadLineField.setWidthFull();
+        billDeadLineField.setStepButtonsVisible(true);
+        billDeadLineField.setMin(1);
+        billBinder.forField(billDeadLineField).asRequired("DeadLine must not be empty").bind(Bill::getDeadLine, Bill::setDeadLine);
+        billDeadLineColumn.setEditorComponent(billDeadLineField);
+
+        Button saveButton = new Button("Save", e -> editor.save());
+        Button cancelButton = new Button(VaadinIcon.CLOSE.create(), e -> editor.cancel());
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
+        HorizontalLayout actions = new HorizontalLayout(saveButton, cancelButton);
+        actions.setPadding(false);
+        editColumn.setEditorComponent(actions);
+        editor.addCancelListener(event -> System.out.println("cancel " + event.getItem()));
+        editor.addSaveListener(event -> {
+            service.save(event.getItem());
+            event.getGrid().setItems(billList);
+        });
+        billGrid.setItems(billList);
     }
 
     private void initUiComponents() {
@@ -110,18 +168,14 @@ public class BillView extends Composite<VerticalLayout> {
         billDeadLineField.setStepButtonsVisible(true);
         billDeadLineField.setMin(1);
 
-        isCreditCard.setLabel("Credit Card");
-        isCreditCard.setId("creditCard");
-        isCreditCard.addSingleClickListener(this::creditCardListener);
+        creditCardCheckbox.setLabel("Credit Card");
+        creditCardCheckbox.setId("creditCard");
+        creditCardCheckbox.addSingleClickListener(this::creditCardListener);
 
-        List<Integer> days = new ArrayList<>();
-        for (int i = 1; i <= 31; i++) {
-            days.add(i);
-        }
-        billDay.setItems(days);
-        billDay.setWidthFull();
-        billDay.setId("billDate");
-        billDay.setLabel("Bill Date");
+        billDaySelect.setItems(getBillingDays());
+        billDaySelect.setWidthFull();
+        billDaySelect.setId("billDate");
+        billDaySelect.setLabel("Bill Date");
 
         buttonSave.setText("Save");
         buttonSave.setId("buttonSave");
@@ -137,13 +191,16 @@ public class BillView extends Composite<VerticalLayout> {
         createBillGrid();
     }
 
-    private void initPrincipalLayoutRow() {
-        getContent().add(layoutRowUp,layoutRowBottom);
-        layoutRowBottom.setId("layoutRowBottom");
-        layoutRowBottom.setWidthFull();
-        layoutRowUp.setFlexGrow(1.0, billGrid);
-        layoutRowBottom.add(billGrid);
+    private List<Integer> getBillingDays() {
+        List<Integer> days = new ArrayList<>();
+        for (int i = 1; i <= 31; i++) {
+            days.add(i);
+        }
+        return days;
+    }
 
+    private void initPrincipalLayoutRow() {
+        getContent().add(layoutRowUp, layoutRowBottom);
         layoutRowUp.setId("layoutRowUp");
         layoutRowUp.setWidthFull();
         layoutRowUp.setFlexGrow(1.0, leftColumn);
@@ -152,6 +209,11 @@ public class BillView extends Composite<VerticalLayout> {
         layoutRowUp.add(centralColumn);
         layoutRowUp.setFlexGrow(1.0, rightColumn);
         layoutRowUp.add(rightColumn);
+
+        layoutRowBottom.setId("layoutRowBottom");
+        layoutRowBottom.setWidthFull();
+        layoutRowBottom.setFlexGrow(1.0, billGrid);
+        layoutRowBottom.add(billGrid);
     }
 
     private void initPrincipalColumns() {
@@ -186,15 +248,14 @@ public class BillView extends Composite<VerticalLayout> {
         column1InRow1InCentralColumn.setWidth(null);
         column1InRow1InCentralColumn.setId("column1InRow1InCentralColumn");
         column1InRow1InCentralColumn.add(billNameField);
-        column1InRow1InCentralColumn.add(billDay);
-        column1InRow1InCentralColumn.add(isCreditCard);
+        column1InRow1InCentralColumn.add(billDaySelect);
+        column1InRow1InCentralColumn.add(creditCardCheckbox);
 
         //column 2 in row 1 in central column
         column2InRow1InCentralColumn.setWidth(null);
         column2InRow1InCentralColumn.add(billTotalField);
         column2InRow1InCentralColumn.add(billDeadLineField);
         column2InRow1InCentralColumn.setId("column2InInternalCentralRow");
-
 
         //row 2 in central column
         row2InCentralColumn.add(buttonSave);
@@ -209,9 +270,9 @@ public class BillView extends Composite<VerticalLayout> {
         }
         String name = billNameField.getValue();
         BigDecimal total = billTotalField.getValue();
-        Integer day = billDay.getValue();
+        Integer day = billDaySelect.getValue();
         Integer deadLine = billDeadLineField.getValue();
-        Boolean creditCard = isCreditCard.getValue();
+        Boolean creditCard = creditCardCheckbox.getValue();
         Bill bill = new Bill();
         bill.setName(name);
         bill.setTotal(total);
@@ -225,7 +286,7 @@ public class BillView extends Composite<VerticalLayout> {
     }
 
     private void creditCardListener(ClickEvent<Checkbox> listener) {
-        if(listener.getSource().getValue()){
+        if (listener.getSource().getValue()) {
             billTotalField.setValue(BigDecimal.ZERO);
             billTotalField.setEnabled(false);
         } else {
@@ -234,19 +295,19 @@ public class BillView extends Composite<VerticalLayout> {
 
     }
 
-    private void setDefaultValueField(){
+    private void setDefaultValueField() {
         billNameField.setValue("");
         billTotalField.setValue(BigDecimal.ZERO);
         billDeadLineField.setValue(1);
-        isCreditCard.setValue(false);
-        billDay.setValue(1);
+        creditCardCheckbox.setValue(false);
+        billDaySelect.setValue(1);
     }
 
     private boolean isEmptyFields() {
         Map<String, Object> fields = new LinkedHashMap<>();
         fields.put("Name", billNameField.getValue());
         fields.put("Total", billTotalField.getValue());
-        fields.put("Bill Date", billDay.getValue());
+        fields.put("Bill Date", billDaySelect.getValue());
         fields.put("Dead Line", billDeadLineField.getValue());
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
             if (entry.getValue() == null) {

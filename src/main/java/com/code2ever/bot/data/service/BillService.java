@@ -18,6 +18,9 @@ public class BillService {
     public void save(Bill bill){
         repository.save(bill);
     }
+    public void delete(Bill bill){
+        repository.delete(bill);
+    }
     public List<Bill> findAll(){
         return repository.findAll();
     }
