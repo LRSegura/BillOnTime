@@ -43,7 +43,8 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
         getContent().add(splitLayout);
         getContent().setHeightFull();
     }
-    private void createPendingPaymentGrid(){
+
+    private void createPendingPaymentGrid() {
         pendingPaymentGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         pendingPaymentGrid.addColumn(AbstractEntity::getId).setAutoWidth(true).setHeader(
                 "Id");
@@ -51,15 +52,15 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
                 "Bill Name");
         pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getBill().getTotal()).setAutoWidth(true).setHeader(
                 "Bill Price");
-        pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getPaid() ? "Yes":"No").setAutoWidth(true).setHeader(
+        pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getPaid() ? "Yes" : "No").setAutoWidth(true).setHeader(
                 "Bill Price");
 //        pendingPaymentGrid.setItems(pendingPaymentService.findAll());
     }
 
-    private void createBatchPaymentGrid(){
+    private void createBatchPaymentGrid() {
         batchPaymentGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         batchPaymentGrid.addColumn(BatchPayment::getBatchDate).setAutoWidth(true).setHeader("Batch Date");
-        batchPaymentGrid.addColumn(batchPayment -> batchPayment.getIsBatchPaid() ? "Yes":"No").setAutoWidth(true).setHeader(
+        batchPaymentGrid.addColumn(batchPayment -> batchPayment.getIsBatchPaid() ? "Yes" : "No").setAutoWidth(true).setHeader(
                 "Paid");
 //        batchPaymentGrid.addComponentColumn()
 //        batchPaymentGrid.addComponentColumn(batchPayment -> batchPayment.getIsBatchPaid())
@@ -78,7 +79,7 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
         });
     }
 
-    private void setUpSplitLayout(SplitLayout splitLayout){
+    private void setUpSplitLayout(SplitLayout splitLayout) {
         Div wrapper = new Div();
         wrapper.setHeightFull();
         wrapper.setClassName("grid-wrapper");
@@ -91,6 +92,7 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
         splitLayout.addToSecondary(wrapper2);
         wrapper2.add(pendingPaymentGrid);
     }
+
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
 
