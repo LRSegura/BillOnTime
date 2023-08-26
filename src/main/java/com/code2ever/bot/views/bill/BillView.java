@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @PageTitle("Bill")
 @Route(value = "bill", layout = MainLayout.class)
@@ -78,6 +80,19 @@ public class BillView extends Composite<VerticalLayout> {
         initUiComponents();
     }
 
+
+    private void setUpConfirmDialog(Bill bill, Consumer<Bill> consumer) {
+        ConfirmDialog dialog = new ConfirmDialog();
+        String header = String.format("Delete \"%s\"?", bill.getName());
+        dialog.setHeader(header);
+        dialog.setText("Are you sure you want to permanently delete this item?");
+        dialog.setCancelable(true);
+        dialog.setConfirmText("Delete");
+        dialog.setConfirmButtonTheme("error primary");
+        dialog.addConfirmListener(event -> consumer.accept(bill));
+        dialog.open();
+    }
+
     private void createBillGrid() {
         billGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         Grid.Column<Bill> billNameColumn = billGrid.addColumn(Bill::getName).setAutoWidth(true).setHeader("Name");
@@ -88,27 +103,27 @@ public class BillView extends Composite<VerticalLayout> {
 
         Editor<Bill> editor = billGrid.getEditor();
         Grid.Column<Bill> editColumn = billGrid.addComponentColumn(bill -> {
-
-            Button editButton = new Button("Edit");
-            Button deleteButton = new Button("Delete", event -> {
-                service.delete(bill);
-                billList.remove(bill);
-                billGrid.setItems(billList);
-            });
-            HorizontalLayout actions = new HorizontalLayout(editButton, deleteButton);
-            actions.setPadding(false);
-            editButton.addClickListener(event -> {
+            Button editButton = new Button("Edit", event -> {
                 if (editor.isOpen()) {
                     editor.cancel();
                 }
                 billGrid.getEditor().editItem(bill);
             });
+            Button deleteButton = new Button("Delete", event -> {
+                Consumer<Bill> consumer = b -> {
+                    service.delete(b);
+                    billList.remove(b);
+                    billGrid.setItems(billList);
+                };
+                setUpConfirmDialog(bill, consumer);
+            });
+            HorizontalLayout actions = new HorizontalLayout(editButton, deleteButton);
+            actions.setPadding(false);
             return actions;
         });
         Binder<Bill> billBinder = new Binder<>(Bill.class);
         editor.setBinder(billBinder);
         editor.setBuffered(true);
-
 
         TextField billNameField = new TextField();
         billNameField.setWidthFull();
@@ -139,7 +154,6 @@ public class BillView extends Composite<VerticalLayout> {
         HorizontalLayout actions = new HorizontalLayout(saveButton, cancelButton);
         actions.setPadding(false);
         editColumn.setEditorComponent(actions);
-        editor.addCancelListener(event -> System.out.println("cancel " + event.getItem()));
         editor.addSaveListener(event -> {
             service.save(event.getItem());
             event.getGrid().setItems(billList);
@@ -283,6 +297,7 @@ public class BillView extends Composite<VerticalLayout> {
         showNotificationSuccess("Bill saved");
         setDefaultValueField();
         billGrid.setItems(service.findAll());
+        billList.add(bill);
     }
 
     private void creditCardListener(ClickEvent<Checkbox> listener) {
