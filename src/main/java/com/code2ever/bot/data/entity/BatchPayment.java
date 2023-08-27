@@ -23,8 +23,8 @@ public class BatchPayment extends AbstractEntity {
     @Column
     private Boolean isBatchPaid;
 
-    @OneToMany(mappedBy = "batchPayments")
-    private List<PendingPayment> pendingPayment;
+//    @OneToMany(mappedBy = "batchPayments")
+//    private List<PendingPayment> pendingPayment;
 
     @Override
     public boolean equals(Object o) {

@@ -36,13 +36,11 @@ public class PendingPayment extends AbstractEntity {
         if (this == o) return true;
         if (!(o instanceof PendingPayment that)) return false;
         if (!super.equals(o)) return false;
-        return Objects.equals(bill, that.bill) && Objects.equals(limitDate, that.limitDate) && Objects.equals(isPaid, that.isPaid);
+        return Objects.equals(bill, that.bill) && Objects.equals(initialDate, that.initialDate) && Objects.equals(limitDate, that.limitDate) && Objects.equals(isPaid, that.isPaid) && Objects.equals(batchPayments, that.batchPayments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), bill, limitDate, isPaid);
+        return Objects.hash(super.hashCode(), bill, initialDate, limitDate, isPaid, batchPayments);
     }
-
-
 }

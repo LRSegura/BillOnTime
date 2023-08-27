@@ -102,25 +102,8 @@ public class BillView extends Composite<VerticalLayout> {
         Grid.Column<Bill> creditCardColumn = billGrid.addColumn(bill -> bill.getIsCreditCard() ? "True" : "False").setAutoWidth(true).setHeader("Credit Card");
 
         Editor<Bill> editor = billGrid.getEditor();
-        Grid.Column<Bill> editColumn = billGrid.addComponentColumn(bill -> {
-            Button editButton = new Button("Edit", event -> {
-                if (editor.isOpen()) {
-                    editor.cancel();
-                }
-                billGrid.getEditor().editItem(bill);
-            });
-            Button deleteButton = new Button("Delete", event -> {
-                Consumer<Bill> consumer = b -> {
-                    service.delete(b);
-                    billList.remove(b);
-                    billGrid.setItems(billList);
-                };
-                setUpConfirmDialog(bill, consumer);
-            });
-            HorizontalLayout actions = new HorizontalLayout(editButton, deleteButton);
-            actions.setPadding(false);
-            return actions;
-        });
+        Grid.Column<Bill> editColumn = billGrid.addComponentColumn(bill -> setUpComponentColumn(bill, editor));
+
         Binder<Bill> billBinder = new Binder<>(Bill.class);
         editor.setBinder(billBinder);
         editor.setBuffered(true);
@@ -159,6 +142,26 @@ public class BillView extends Composite<VerticalLayout> {
             event.getGrid().setItems(billList);
         });
         billGrid.setItems(billList);
+    }
+
+    private HorizontalLayout setUpComponentColumn(Bill bill, Editor<Bill> editor) {
+        Button editButton = new Button("Edit", event -> {
+            if (editor.isOpen()) {
+                editor.cancel();
+            }
+            billGrid.getEditor().editItem(bill);
+        });
+        Button deleteButton = new Button("Delete", event -> {
+            Consumer<Bill> consumer = b -> {
+                service.delete(b);
+                billList.remove(b);
+                billGrid.setItems(billList);
+            };
+            setUpConfirmDialog(bill, consumer);
+        });
+        HorizontalLayout actions = new HorizontalLayout(editButton, deleteButton);
+        actions.setPadding(false);
+        return actions;
     }
 
     private void initUiComponents() {
@@ -282,6 +285,15 @@ public class BillView extends Composite<VerticalLayout> {
         if (isEmptyFields()) {
             return;
         }
+        Bill bill = getNewBill();
+        service.save(bill);
+        showNotificationSuccess("Bill saved");
+        setDefaultValueField();
+        billGrid.setItems(service.findAll());
+        billList.add(bill);
+    }
+
+    private Bill getNewBill() {
         String name = billNameField.getValue();
         BigDecimal total = billTotalField.getValue();
         Integer day = billDaySelect.getValue();
@@ -293,11 +305,7 @@ public class BillView extends Composite<VerticalLayout> {
         bill.setBillingDay(day);
         bill.setDeadLine(deadLine);
         bill.setIsCreditCard(creditCard);
-        service.save(bill);
-        showNotificationSuccess("Bill saved");
-        setDefaultValueField();
-        billGrid.setItems(service.findAll());
-        billList.add(bill);
+        return bill;
     }
 
     private void creditCardListener(ClickEvent<Checkbox> listener) {

@@ -4,6 +4,7 @@ import com.code2ever.bot.data.entity.BatchPayment;
 import com.code2ever.bot.data.entity.PendingPayment;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -17,12 +18,13 @@ public class PendingPaymentService {
 
     public void save(PendingPayment pendingPayment){
         repository.save(pendingPayment);
+//        repository.fin
     }
 
     public List<PendingPayment> findAll(){
         return repository.findAll();
     }
-    public List<PendingPayment> findAllByBatchPayment(BatchPayment batchPayment){
+    public Collection<PendingPayment> findAllByBatchPayment(BatchPayment batchPayment){
         return repository.findPendingPaymentByBatchPayments(batchPayment);
     }
 

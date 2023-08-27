@@ -1,6 +1,6 @@
 package com.code2ever.bot.views;
 
-import com.code2ever.bot.views.about.BatchView;
+import com.code2ever.bot.views.batch.BatchView;
 import com.code2ever.bot.views.bill.BillView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
