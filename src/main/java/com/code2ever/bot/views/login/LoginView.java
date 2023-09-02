@@ -24,8 +24,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         setAlignItems(Alignment.CENTER);
 
         login.setAction("login");
-
-        add(new H1("Test Application"), login);
+        add(new H1("Bill On Time"), login);
     }
 
     @Override

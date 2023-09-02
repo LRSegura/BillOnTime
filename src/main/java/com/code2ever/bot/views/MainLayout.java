@@ -7,6 +7,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
@@ -15,6 +16,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 /**
@@ -22,14 +24,14 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
  */
 public class MainLayout extends AppLayout {
 
-    private final transient AuthenticationContext authContext;
+    private final AuthenticationContext authContext;
     private final SecurityService securityService;
     private H2 viewTitle;
 
     public MainLayout(AuthenticationContext authContext, SecurityService securityService) {
         this.authContext = authContext;
         this.securityService = securityService;
-
+//        System.out.println("password:" + new BCryptPasswordEncoder().encode("12345"));
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
         addHeaderContent();
@@ -52,10 +54,19 @@ public class MainLayout extends AppLayout {
 //            addToNavbar(true, header);
 //        }
 
-        HorizontalLayout header = authContext.getAuthenticatedUser(UserDetails.class).map(user -> {
+//        HorizontalLayout header = authContext.getAuthenticatedUser(UserDetails.class).map(user -> {
+//            Button logout = new Button("Logout", click -> this.authContext.logout());
+//            Span loggedUser = new Span("Welcome " + user.getUsername());
+//            HorizontalLayout layout = new HorizontalLayout(FlexComponent.JustifyContentMode.END, loggedUser, logout);
+//            layout.setWidthFull();
+//            return layout;
+//        }).orElseGet(() -> new HorizontalLayout());
+        HorizontalLayout header = authContext.getPrincipalName().map(user -> {
             Button logout = new Button("Logout", click -> this.authContext.logout());
-            Span loggedUser = new Span("Welcome " + user.getUsername());
-            return new HorizontalLayout(loggedUser, logout);
+            Span loggedUser = new Span("Welcome " + user);
+            HorizontalLayout layout = new HorizontalLayout(FlexComponent.JustifyContentMode.END, loggedUser, logout);
+            layout.setWidthFull();
+            return layout;
         }).orElseGet(() -> new HorizontalLayout());
         addToNavbar(true, header);
     }
@@ -79,8 +90,7 @@ public class MainLayout extends AppLayout {
     }
 
     private Footer createFooter() {
-        Footer layout = new Footer();
-        return layout;
+        return new Footer();
     }
 
     @Override
