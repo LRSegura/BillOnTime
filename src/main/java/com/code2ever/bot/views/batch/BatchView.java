@@ -19,6 +19,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -27,6 +28,7 @@ import java.util.TreeSet;
 @PageTitle("Batch")
 @Route(value = "bot/batch", layout = MainLayout.class)
 @Uses(Icon.class)
+@PermitAll
 public class BatchView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 
     private final Grid<BatchPayment> batchPaymentGrid = new Grid<>(BatchPayment.class, false);
@@ -59,8 +61,16 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
         pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getBill().getTotal()).setAutoWidth(true).setHeader("Total");
         pendingPaymentGrid.addColumn(PendingPayment::getInitialDate).setAutoWidth(true).setHeader("Initial Date");
         pendingPaymentGrid.addColumn(PendingPayment::getLimitDate).setAutoWidth(true).setHeader("Limit Date");
-        pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getIsPaid() ? "Yes" : "No").setAutoWidth(true).setHeader("Paid");
+        pendingPaymentGrid.addColumn(pendingPayment -> pendingPayment.getIsPaid() ? "Yes" : "No").setAutoWidth(true)
+                .setHeader("Paid").setPartNameGenerator(pendingPayment -> "font-weight-bold");
         pendingPaymentGrid.addComponentColumn(this::setUpComponentColumnPendingPaymentGrid);
+        pendingPaymentGrid.setPartNameGenerator(pendingPayment -> {
+            if (pendingPayment.getIsPaid()) {
+                return "high-rating";
+            } else {
+                return "low-rating";
+            }
+        });
     }
 
     private HorizontalLayout setUpComponentColumnPendingPaymentGrid(PendingPayment pendingPayment) {
@@ -84,8 +94,7 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
         pendingPaymentSet.remove(pendingPayment);
         pendingPaymentSet.add(payment);
         pendingPaymentGrid.setItems(pendingPaymentSet);
-        boolean isAllPaid =
-                pendingPaymentSet.stream().filter(PendingPayment::getIsPaid).count() == pendingPaymentSet.size();
+        boolean isAllPaid = pendingPaymentSet.stream().filter(PendingPayment::getIsPaid).count() == pendingPaymentSet.size();
         BatchPayment batch = batchRepository.findById(currentBatchPayment.getId()).orElseThrow();
         batchPaymentSet.remove(currentBatchPayment);
         batchPaymentSet.add(batch);
@@ -113,7 +122,7 @@ public class BatchView extends Composite<VerticalLayout> implements BeforeEnterO
     private void setUpSplitLayout(SplitLayout splitLayout) {
         Div wrapper = new Div();
         wrapper.setHeightFull();
-        wrapper.setClassName("grid-wrapper");
+        wrapper.setClassName("grid-wrapper2");
         splitLayout.addToPrimary(wrapper);
         wrapper.add(batchPaymentGrid);
 

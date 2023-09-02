@@ -31,6 +31,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import jakarta.annotation.security.PermitAll;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import java.util.function.Consumer;
 @PageTitle("Bill")
 @Route(value = "bot/bill", layout = MainLayout.class)
 @Uses(Icon.class)
+@PermitAll
 public class BillView extends Composite<VerticalLayout> {
 
     private final HorizontalLayout layoutRowUp = new HorizontalLayout();
