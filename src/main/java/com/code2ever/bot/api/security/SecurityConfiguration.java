@@ -52,7 +52,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
         // super.configure(HttpSecurity) as it adds final anyRequest matcher
 
         PortMapperImpl portMapper = new PortMapperImpl();
-        portMapper.setPortMappings(Collections.singletonMap("80","443"));
+        portMapper.setPortMappings(Collections.singletonMap("8080","8443"));
         PortResolverImpl portResolver = new PortResolverImpl();
         portResolver.setPortMapper(portMapper);
         LoginUrlAuthenticationEntryPoint entryPoint = new LoginUrlAuthenticationEntryPoint(
